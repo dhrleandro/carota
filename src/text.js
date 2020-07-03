@@ -97,7 +97,10 @@ var measureText = exports.measureText = function(text, style) {
         block.style.verticalAlign = 'bottom';
         result.height = (block.offsetTop - span.offsetTop);
         result.descent = result.height - result.ascent;
-        result.width = span.offsetWidth;
+        // result.width = span.offsetWidth;
+        // Note: offsetWidth value is bit different for non breaking spaces and
+        // thegetBoundingClientRect().width is always correct. 
+        result.width = span.getBoundingClientRect().width;
     } finally {
         div.parentNode.removeChild(div);
         div = null;
