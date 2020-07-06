@@ -90,7 +90,10 @@ var measureText = exports.measureText = function(text, style) {
 
         span.innerHTML = '';
         span.style.fontKerning = 'none';
-        span.appendChild(document.createTextNode(text.replace(/\s/g, nbsp)));
+
+        // The width of nbsp and normal space is different
+        // To get the correct space width normal space is sandwiched between non breaking zero width space
+        span.appendChild(document.createTextNode(text.replace(/\s/g, '\uFEFF \uFEFF')));
 
         var result = {};
         block.style.verticalAlign = 'baseline';
