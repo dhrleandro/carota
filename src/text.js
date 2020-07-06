@@ -89,17 +89,20 @@ var measureText = exports.measureText = function(text, style) {
         span.setAttribute('style', style);
 
         span.innerHTML = '';
+        span.style.fontKerning = 'none';
         span.appendChild(document.createTextNode(text.replace(/\s/g, nbsp)));
 
         var result = {};
         block.style.verticalAlign = 'baseline';
-        result.ascent = (block.offsetTop - span.offsetTop);
+
+        // Note: offsetWidth and offestTop values are bit different conpmaring to
+        // getBoundingClientRect.width / top, the correct measurements should be
+        // taken from getBoundingClientRect
+
+        result.ascent = (block.getBoundingClientRect().top - span.getBoundingClientRect().top);
         block.style.verticalAlign = 'bottom';
-        result.height = (block.offsetTop - span.offsetTop);
+        result.height = (block.getBoundingClientRect().top - span.getBoundingClientRect().top);
         result.descent = result.height - result.ascent;
-        // result.width = span.offsetWidth;
-        // Note: offsetWidth value is bit different for non breaking spaces and
-        // thegetBoundingClientRect().width is always correct. 
         result.width = span.getBoundingClientRect().width;
     } finally {
         div.parentNode.removeChild(div);
