@@ -89,15 +89,24 @@ var measureText = exports.measureText = function(text, style) {
         span.setAttribute('style', style);
 
         span.innerHTML = '';
-        span.appendChild(document.createTextNode(text.replace(/\s/g, nbsp)));
+        span.style.fontKerning = 'none';
+
+        // The width of nbsp and normal space is different
+        // To get the correct space width normal space is sandwiched between non breaking zero width space
+        span.appendChild(document.createTextNode(text.replace(/\s/g, '\uFEFF \uFEFF')));
 
         var result = {};
         block.style.verticalAlign = 'baseline';
-        result.ascent = (block.offsetTop - span.offsetTop);
+
+        // Note: offsetWidth and offestTop values are bit different conpmaring to
+        // getBoundingClientRect.width / top, the correct measurements should be
+        // taken from getBoundingClientRect
+
+        result.ascent = (block.getBoundingClientRect().top - span.getBoundingClientRect().top);
         block.style.verticalAlign = 'bottom';
-        result.height = (block.offsetTop - span.offsetTop);
+        result.height = (block.getBoundingClientRect().top - span.getBoundingClientRect().top);
         result.descent = result.height - result.ascent;
-        result.width = span.offsetWidth;
+        result.width = span.getBoundingClientRect().width;
     } finally {
         div.parentNode.removeChild(div);
         div = null;
