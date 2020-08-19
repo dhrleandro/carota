@@ -6,5 +6,5 @@ exports = module.exports = function( data, width, styles ) {
     carota.load( data );
     carota.width( width );
     carota.draw( canvas.getContext( '2d' ));
-    return { width: carota.frame.actualWidth(), height: carota.frame.actualHeight() };
+    return { width: carota.frame.actualWidth(), height: carota.frame.actualHeight(), minWidth: carota.frame.minWidth() };
 };
