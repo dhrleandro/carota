@@ -6,6 +6,7 @@ exports = module.exports = function( data, width, styles, roundByOffset = 0.005,
     carota.load( data );
     carota.width( width );
     carota.draw( canvas.getContext( '2d' ));
+    // Round up to avoid text cutoff issues across browsers and OS'
     var width = carota.frame.actualWidth();
     var roundedWidth = +(( width + roundByOffset ).toFixed( roundTo ));
     var height = carota.frame.actualHeight();
