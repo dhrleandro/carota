@@ -1,4 +1,4 @@
-exports.formattingKeys = [ 'bold', 'italic', 'underline', 'strikeout', 'color', 'font', 'size', 'align', 'script', 'link' ];
+exports.formattingKeys = [ 'bold', 'italic', 'underline', 'strikeout', 'color', 'font', 'size', 'align', 'script', 'link', 'backgroundColor' ];
 
 exports.sameFormatting = function(run1, run2) {
     return exports.formattingKeys.every(function(key) {
