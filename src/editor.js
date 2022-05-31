@@ -3,19 +3,20 @@ var carotaDoc = require('./doc');
 var dom = require('./dom');
 var rect = require('./rect');
 
-setInterval(function() {
-    var editors = document.querySelectorAll('.carotaEditorCanvas');
+// NOTE: Carota is used only to render text so this is not needed
+// setInterval(function() {
+//     var editors = document.querySelectorAll('.carotaEditorCanvas');
 
-    var ev = document.createEvent('Event');
-    ev.initEvent('carotaEditorSharedTimer', true, true);
+//     var ev = document.createEvent('Event');
+//     ev.initEvent('carotaEditorSharedTimer', true, true);
 
-    // not in IE, apparently:
-    // var ev = new CustomEvent('carotaEditorSharedTimer');
+//     // not in IE, apparently:
+//     // var ev = new CustomEvent('carotaEditorSharedTimer');
 
-    for (var n = 0; n < editors.length; n++) {
-        editors[n].dispatchEvent(ev);
-    }
-}, 200);
+//     for (var n = 0; n < editors.length; n++) {
+//         editors[n].dispatchEvent(ev);
+//     }
+// }, 200);
 var editors = new WeakSet();
 var create = function(element, defaultFormatting, drawtext = true ) {
 
@@ -517,7 +518,7 @@ var create = function(element, defaultFormatting, drawtext = true ) {
         }
     };
 
-    dom.handleEvent(canvas, 'carotaEditorSharedTimer', update);
+    // dom.handleEvent(canvas, 'carotaEditorSharedTimer', update);
     update();
 
     doc.sendKey = handleKey;
