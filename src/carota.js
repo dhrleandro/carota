@@ -1,3 +1,4 @@
+/// all this will have to go. make it a normal module rather than attaching to window
 var node = require('./node');
 var editor = require('./editor');
 var doc = require('./doc');

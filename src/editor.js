@@ -1,8 +1,12 @@
-var per = require('per');
+/// this is responsible for creating canvas, rendering data to canvas, handling events;
+/// good candidate for a class
+
 var carotaDoc = require('./doc');
 var dom = require('./dom');
 var rect = require('./rect');
 
+
+/// REVISIT: still not sure what the shared timer is for.
 setInterval(function() {
     var editors = document.querySelectorAll('.carotaEditorCanvas');
 
@@ -17,6 +21,8 @@ setInterval(function() {
     }
 }, 200);
 
+
+/// entry-point
 exports.create = function(element) {
 
     // We need the host element to be a container:
@@ -24,6 +30,7 @@ exports.create = function(element) {
         element.style.position = 'relative';
     }
 
+    /// create canvas and hidden <textarea>; probably could be cleaned up
     element.innerHTML =
         '<div class="carotaSpacer">' +
             '<canvas width="100" height="100" class="carotaEditorCanvas" style="position: absolute;"></canvas>' +
@@ -34,19 +41,22 @@ exports.create = function(element) {
             'outline: none; font-size: 4px;"></textarea>'
         '</div>';
 
+    /// 'doc' and down is the good stuff
     var canvas = element.querySelector('canvas'),
         spacer = element.querySelector('.carotaSpacer'),
         textAreaDiv = element.querySelector('.carotaTextArea'),
         textArea = element.querySelector('textarea'),
         doc = carotaDoc(),
         keyboardSelect = 0,
-        keyboardX = null, nextKeyboardX = null,
+        keyboardX = null,
+        nextKeyboardX = null,
         selectDragStart = null,
         focusChar = null,
         textAreaContent = '',
         richClipboard = null,
         plainClipboard = null;
     
+    /// REVISIT: honestly, no idea what the hell the keys mean here
     var toggles = {
         66: 'bold',
         73: 'italic',
@@ -54,15 +64,18 @@ exports.create = function(element) {
         83: 'strikeout'
     };
 
+    /// REVISIT: definitely used in cursor movement calculations...'ordinal' 
     var exhausted = function(ordinal, direction) {
         return direction < 0 ? ordinal <= 0 : ordinal >= doc.frame.length - 1;
     };
 
+    /// determines whether or not carets are on separate lines
     var differentLine = function(caret1, caret2) {
         return (caret1.b <= caret2.t) ||
                (caret2.b <= caret1.t);
     };
 
+    /// puts cursor on a different line?
     var changeLine = function(ordinal, direction) {
 
         var originalCaret = doc.getCaretCoords(ordinal), newCaret;
@@ -107,6 +120,8 @@ exports.create = function(element) {
         return ordinal;
     };
 
+
+    /// biiiig key handler here...this is attached with a 'dom' utility function
     var handleKey = function(key, selecting, ctrlKey) {
         var start = doc.selection.start,
             end = doc.selection.end,
