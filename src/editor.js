@@ -6,19 +6,14 @@ var dom = require('./dom');
 var rect = require('./rect');
 
 
-/// REVISIT: still not sure what the shared timer is for.
+/// shared timer for cursor blinks, bounds size changes, focus changes
 setInterval(function() {
     var editors = document.querySelectorAll('.carotaEditorCanvas');
 
     var ev = document.createEvent('Event');
     ev.initEvent('carotaEditorSharedTimer', true, true);
 
-    // not in IE, apparently:
-    // var ev = new CustomEvent('carotaEditorSharedTimer');
-
-    for (var n = 0; n < editors.length; n++) {
-        editors[n].dispatchEvent(ev);
-    }
+    [...editors].forEach(e => e.dispatchEvent(ev));
 }, 200);
 
 
@@ -48,23 +43,25 @@ exports.create = function(element) {
         textArea = element.querySelector('textarea'),
         doc = carotaDoc(),
         keyboardSelect = 0,
-        keyboardX = null,
-        nextKeyboardX = null,
+        keyboardX = null, /// i think this is the last x-position of cursor from key-related events
+        nextKeyboardX = null, /// if the above is true, this is the next (current) one
         selectDragStart = null,
         focusChar = null,
         textAreaContent = '',
         richClipboard = null,
         plainClipboard = null;
     
-    /// REVISIT: honestly, no idea what the hell the keys mean here
     var toggles = {
-        66: 'bold',
-        73: 'italic',
-        85: 'underline',
-        83: 'strikeout'
+        66: 'bold',      /// 'b'
+        73: 'italic',    /// 'i'
+        85: 'underline', /// 'u'
+        83: 'strikeout'  /// 's'
     };
 
-    /// REVISIT: definitely used in cursor movement calculations...'ordinal' 
+    /// direction will be 1 if going down, -1 if going up
+    /// ordinal is character position from beginning of file
+    /// returns a boolean:
+    ///   true if: ordinal <= 0 OR ordinal >= doc.frame.
     var exhausted = function(ordinal, direction) {
         return direction < 0 ? ordinal <= 0 : ordinal >= doc.frame.length - 1;
     };
@@ -75,12 +72,17 @@ exports.create = function(element) {
                (caret2.b <= caret1.t);
     };
 
-    /// puts cursor on a different line?
+    /// puts caret on a different line? params are int's; ordinal is 'index' position, direction is 1 or -1
     var changeLine = function(ordinal, direction) {
 
-        var originalCaret = doc.getCaretCoords(ordinal), newCaret;
+        /// saves current caret position
+        var originalCaret = doc.getCaretCoords(ordinal),
+            newCaret;
+        
+        /// update nextKeyboardX
         nextKeyboardX = (keyboardX !== null) ? keyboardX : originalCaret.l;
 
+        /// this seems to just move the caret one character at a time to the next line
         while (!exhausted(ordinal, direction)) {
             ordinal += direction;
             newCaret = doc.getCaretCoords(ordinal);
@@ -90,7 +92,9 @@ exports.create = function(element) {
         }
 
         originalCaret = newCaret;
+        /// this puts the caret in the right place
         while (!exhausted(ordinal, direction)) {
+            /// break if caret is in equivalent place to previous x-pos
             if ((direction > 0 && newCaret.l >= nextKeyboardX) ||
                 (direction < 0 && newCaret.l <= nextKeyboardX)) {
                 break;
@@ -98,20 +102,26 @@ exports.create = function(element) {
 
             ordinal += direction;
             newCaret = doc.getCaretCoords(ordinal);
+            /// this seems to be to correct for the case where we've gone too far onto the next line
             if (differentLine(newCaret, originalCaret)) {
                 ordinal -= direction;
                 break;
             }
         }
 
+        /// TODO: there's gotta be a better way of doing this. This seems very inefficient
+
         return ordinal;
     };
 
+    /// moves caret to end of line ('end' key was pressed)
     var endOfline = function(ordinal, direction) {
         var originalCaret = doc.getCaretCoords(ordinal), newCaret;
         while (!exhausted(ordinal, direction)) {
             ordinal += direction;
             newCaret = doc.getCaretCoords(ordinal);
+
+            /// correction for if we've gone too far
             if (differentLine(newCaret, originalCaret)) {
                 ordinal -= direction;
                 break;
@@ -122,14 +132,20 @@ exports.create = function(element) {
 
 
     /// biiiig key handler here...this is attached with a 'dom' utility function
+    /// TODO: big problem here with CTRL vs. CMD on mac that needs fixing
     var handleKey = function(key, selecting, ctrlKey) {
+        /// doc is storing the relevant state information for selections
         var start = doc.selection.start,
             end = doc.selection.end,
-            length = doc.frame.length - 1,
+            length = doc.frame.length - 1, /// total length of doc frame (size? content?)
             handled = false;
+        
+        console.log(`handleKey: ${key}, ${selecting}, ${ctrlKey}, ${start}, ${end}`);
 
+        /// this resets this...kinda strange
         nextKeyboardX = null;
 
+        /// if we're not in a selection 'mode' then set keyboardSelect to 0
         if (!selecting) {
             keyboardSelect = 0;
         } else if (!keyboardSelect) {
@@ -149,16 +165,21 @@ exports.create = function(element) {
             }
         }
 
+        /// sets the ordinal to the end if selecting forward, or to the start if selecting backward (always start when not selecting)
         var ordinal = keyboardSelect === 1 ? end : start;
 
+        /// keep track of whether this key press changes caret position
         var changingCaret = false;
+
         switch (key) {
             case 37: // left arrow
                 if (!selecting && start != end) {
+                    /// set ordinal to start (of selection) here
                     ordinal = start;
-                } else {
+                } else { /// selecting here
                     if (ordinal > 0) {
-                        if (ctrlKey) {
+                        if (ctrlKey) { /// selection that moves to start of word...very nice feature
+                            /// this will be of shape: { word: String, ordinal: Number, index: Number, offset: Number }
                             var wordInfo = doc.wordContainingOrdinal(ordinal);
                             if (wordInfo.ordinal === ordinal) {
                                 ordinal = wordInfo.index > 0 ? doc.wordOrdinal(wordInfo.index - 1) : 0;
@@ -166,9 +187,11 @@ exports.create = function(element) {
                                 ordinal = wordInfo.ordinal;
                             }
                         } else {
+                            /// simply move ordinal down if not ctrl key
                             ordinal--;
                         }
                     }
+                    /// don't modify ordinal if we're already at beginning of doc
                 }
                 changingCaret = true;
                 break;
@@ -195,11 +218,11 @@ exports.create = function(element) {
                 ordinal = changeLine(ordinal, -1);
                 changingCaret = true;
                 break;
-            case 36: // start of line
+            case 36: // home - start of line
                 ordinal = endOfline(ordinal, -1);
                 changingCaret = true;
                 break;
-            case 35: // end of line
+            case 35: // end - end of line
                 ordinal = endOfline(ordinal, 1);
                 changingCaret = true;
                 break;
@@ -293,20 +316,23 @@ exports.create = function(element) {
         return handled;
     };
 
+    /// attaches our giant key handler to the invisible textArea
     dom.handleEvent(textArea, 'keydown', function(ev) {
         if (handleKey(ev.keyCode, ev.shiftKey, ev.ctrlKey)) {
             return false;
         }
-        console.log(ev.which);
+        // console.log(ev.which);
     });
 
     var verticalAlignment = 'top';
     
+    /// sets the function in doc
     doc.setVerticalAlignment = function(va) {
         verticalAlignment = va;
         paint();
     }
 
+    /// calculates vertical offset for 'middle' and 'bottom' alignment (verticalAlignment value)
     function getVerticalOffset() {
         var docHeight = doc.frame.bounds().h;
         if (docHeight < element.clientHeight) { 
@@ -320,20 +346,28 @@ exports.create = function(element) {
         return 0;
     }
 
+    /// main painting function 
     var paint = function() {
 
+        /// i think the comment here is a debug note? -->
         var availableWidth = element.clientWidth * 1; // adjust to 0.5 to see if we draw in the wrong places!
+
+        /// resize the doc width according to the actual available element width
         if (doc.width() !== availableWidth) {
             doc.width(availableWidth);
         }
 
+        /// gets the height of the frame
         var docHeight = doc.frame.bounds().h;
 
+        /// save the device pixel ratio
         var dpr = Math.max(1, window.devicePixelRatio || 1);
         
+        /// actual width/height of lines in frame
         var logicalWidth = Math.max(doc.frame.actualWidth(), element.clientWidth),
             logicalHeight = element.clientHeight;
         
+        /// sizes the canvas
         canvas.width = dpr * logicalWidth;
         canvas.height = dpr * logicalHeight;
         canvas.style.width = logicalWidth + 'px';
@@ -343,6 +377,7 @@ exports.create = function(element) {
         spacer.style.width = logicalWidth + 'px';
         spacer.style.height = Math.max(docHeight, element.clientHeight) + 'px';
 
+        /// scrollbar stuff
         if (docHeight < (element.clientHeight - 50) &&
             doc.frame.actualWidth() <= availableWidth) {
             element.style.overflow = 'hidden';
@@ -356,12 +391,17 @@ exports.create = function(element) {
         ctx.clearRect(0, 0, logicalWidth, logicalHeight);
         ctx.translate(0, getVerticalOffset() - element.scrollTop);
         
+        /// heavy lifting is here
         doc.draw(ctx, rect(0, element.scrollTop, logicalWidth, logicalHeight));
+
+        /// draw's the selection 'layer'
         doc.drawSelection(ctx, selectDragStart || (document.activeElement === textArea));
     };
 
+    /// gotta repaint on scroll
     dom.handleEvent(element, 'scroll', paint);
 
+    /// i think this is for handling cut/paste
     dom.handleEvent(textArea, 'input', function() {
         var newText = textArea.value;
         if (textAreaContent != newText) {
@@ -374,7 +414,9 @@ exports.create = function(element) {
         }
     });
 
+    /// REVISIT: not sure what this is used for. looks like maybe updating scroll location?
     var updateTextArea = function() {
+        console.log('updateTextArea');
         focusChar = focusChar === null ? doc.selection.end : focusChar;
         var endChar = doc.byOrdinal(focusChar);
         focusChar = null;
@@ -406,11 +448,13 @@ exports.create = function(element) {
         textArea.value = textAreaContent;
         textArea.select();
 
+        /// kind of weird that you have to do this?
         setTimeout(function() {
             textArea.focus();
         }, 10);
     };
 
+    /// register selection changed handler, need to repaint and update textarea (i guess)
     doc.selectionChanged(function(getformatting, takeFocus) {
         paint();
         if (!selectDragStart) {
@@ -420,18 +464,21 @@ exports.create = function(element) {
         }
     });
 
+    /// simple wrapper for adding mouse events to the spacer (div wrapper around canvas)
     function registerMouseEvent(name, handler) {
         dom.handleMouseEvent(spacer, name, function(ev, x, y) {
             handler(doc.byCoordinate(x, y - getVerticalOffset()));
         });
     }
 
+    /// registers mouse down handler (used for selection)
     registerMouseEvent('mousedown', function(node) {
         selectDragStart = node.ordinal;
         doc.select(node.ordinal, node.ordinal);
         keyboardX = null;
     });
 
+    /// registers double click handler (for word selection...really nice)
     registerMouseEvent('dblclick', function(node) {
         node = node.parent();
         if (node) {
@@ -440,6 +487,7 @@ exports.create = function(element) {
         }
     });
 
+    /// attaches mouse move handler (used for selection)
     registerMouseEvent('mousemove', function(node) {
         if (selectDragStart !== null) {
             if (node) {
@@ -453,6 +501,7 @@ exports.create = function(element) {
         }
     });
 
+    /// attaches mouse up handler (used for end of selection)
     registerMouseEvent('mouseup', function(node) {
         selectDragStart = null;
         keyboardX = null;
@@ -460,11 +509,17 @@ exports.create = function(element) {
         textArea.focus();
     });
 
-    var nextCaretToggle = new Date().getTime(),
-        focused = false,
-        cachedWidth = element.clientWidth,
-        cachedHeight = element.clientHeight;
+    /// guessing this is for blinking cursor
+    var nextCaretToggle = new Date().getTime();
 
+    /// not sure what is assumed to be 'focused' here? canvas?
+    var focused = false;
+
+    /// save height/width of our 'root' element
+    var cachedWidth = element.clientWidth;
+    var cachedHeight = element.clientHeight;
+
+    /// handler for shared timer
     var update = function() {
         var requirePaint = false;
         var newFocused = document.activeElement === textArea;
@@ -493,9 +548,12 @@ exports.create = function(element) {
         }
     };
 
+    /// aha! here's the shared timer...looks like it's used for determining whether repaint is needed
+    /// for caret blinks, focus change, height/width change
     dom.handleEvent(canvas, 'carotaEditorSharedTimer', update);
     update();
 
+    /// REVISIT: find out why we set 'sendKey' to the giant key handler
     doc.sendKey = handleKey;
     return doc;
 };

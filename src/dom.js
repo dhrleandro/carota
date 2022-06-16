@@ -1,3 +1,4 @@
+/// utility functions for dom manipulations
 
 exports.isAttached = function(element) {
     var ancestor = element;

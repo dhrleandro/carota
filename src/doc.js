@@ -1,3 +1,5 @@
+/// 
+
 var per = require('per');
 var characters = require('./characters');
 var split = require('./split');
@@ -10,6 +12,7 @@ var frame = require('./frame');
 var codes = require('./codes');
 var rect = require('./rect');
 
+/// REVISIT
 var makeEditCommand = function(doc, start, count, words) {
     var selStart = doc.selection.start, selEnd = doc.selection.end;
     return function(log) {
@@ -20,6 +23,8 @@ var makeEditCommand = function(doc, start, count, words) {
     };
 };
 
+
+/// REVISIT
 var makeTransaction = function(perform) {
     var commands = [];
     var log = function(command) {
@@ -37,6 +42,7 @@ var makeTransaction = function(perform) {
     };
 };
 
+/// 
 var isBreaker = function(word) {
     if (word.isNewLine()) {
         return true;

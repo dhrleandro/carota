@@ -1,3 +1,6 @@
+/// utility functions. 'event' is a simple event dispatcher (good candidate for class).
+/// 'derive' just implements an inheritance scheme. can go away with class composition
+
 exports.event = function() {
     var handlers = [];
 

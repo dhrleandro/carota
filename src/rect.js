@@ -1,3 +1,4 @@
+// rect is a simple utility wrapper around canvas objects and drawing
 
 var prototype = {
     contains: function(x, y) {
@@ -25,11 +26,11 @@ var prototype = {
 
 var rect = module.exports = function(l, t, w, h) {
     return Object.create(prototype, {
-        l: { value: l },
-        t: { value: t },
-        w: { value: w },
-        h: { value: h },
-        r: { value: l + w },
-        b: { value: t + h }
+        l: { value: l },     /// 'left'
+        t: { value: t },     /// 'top' 
+        w: { value: w },     /// 'width'
+        h: { value: h },     /// 'height'
+        r: { value: l + w }, /// 'right'
+        b: { value: t + h }  /// 'bottom'
     });
 };

@@ -1,5 +1,5 @@
-var per = require('per');
-var runs = require('./runs');
+/// 
+
 var rect = require('./rect');
 var util = require('./util');
 
@@ -101,6 +101,8 @@ exports.prototype = {
         var p = this.parent();
         return p && (p.type === type ? p : p.parentOfType(type));
     },
+    /// calculates bounds by going through all children and getting furthest point in each direction
+    /// returns 'rect' object
     bounds: function() {
         var l = this._left, t = this._top, r = 0, b = 0;
         this.children().forEach(function(child) {
@@ -114,6 +116,7 @@ exports.prototype = {
     }
 };
 
+/// wrapper around util.derive
 exports.derive = function(methods) {
     return util.derive(exports.prototype, methods);
 };
