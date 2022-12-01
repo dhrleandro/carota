@@ -125,7 +125,7 @@ newLines.forEach(function(name) {
     isNewLine[name] = true;
 });
 
-exports.parse = function(html, defaultFormatting, classes) {
+exports.parse = function(html, defaultFormatting, classes={}) {
     var root = html;
     if (typeof root === 'string') {
         root = document.createElement('div');
