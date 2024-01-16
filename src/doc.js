@@ -27,7 +27,7 @@ var makeTransaction = function(perform) {
     var commands = [];
     var log = function(command) {
         commands.push(command);
-        log.length = commands.length;
+        Object.defineProperty(log, 'length', { writable: true, value: commands.length });
     };
     perform(log);
 
@@ -99,8 +99,7 @@ var prototype = node.derive({
             && this.words[ this.words.length - 1 ].text.plainText === '\n'
         ) {
             var prev = this.words[ this.words.length - 2 ];
-            var cur = this.words[ this.words.length - 1 ];
-
+            var cur = { ...this.words[ this.words.length - 1 ]};
             // word properties are created by cloning using Object.create() and ascent and descent 
             // properties are readonly, so have to delete and set.
             delete cur.ascent;
