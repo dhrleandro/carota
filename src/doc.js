@@ -27,7 +27,7 @@ var makeTransaction = function(perform) {
     var commands = [];
     var log = function(command) {
         commands.push(command);
-        log.length = commands.length;
+        Object.defineProperty(log, 'length', { writable: true, value: commands.length });
     };
     perform(log);
 
