@@ -9,6 +9,7 @@
   },
   "main": "src/carota.js",
   "scripts": {
+    "dev": "node server.js",
     "prepublish": "node make"
   },
   "dependencies": {

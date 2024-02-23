@@ -21,7 +21,7 @@ On the other hand, I have no objections to anyone basing more advanced editors o
 
 ```sh
 npm install
-node server.js
+npm run dev
 ```
 
 Open http://localhost:3003
