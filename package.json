@@ -13,17 +13,17 @@
     "prepublish": "node make"
   },
   "dependencies": {
+    "@node-minify/core": "^8.0.6",
+    "@node-minify/uglify-js": "^8.0.6",
     "per": "0.1.7"
   },
   "devDependencies": {
-    "webmake": "0.3.19",
-    "node-minify": "0.8.1",
     "express": "3.3.4",
-    "uglifyjs": "2.4.10"
+    "webmake": "0.3.19"
   },
-  "engines" : { 
-    "npm" : ">=8.0.0 <9.0.0",
-    "node" : ">=16.0.0 <17.0.0"
+  "engines": {
+    "npm": ">=8.0.0 <9.0.0",
+    "node": ">=16.0.0 <17.0.0"
   },
   "license": "MIT"
 }
