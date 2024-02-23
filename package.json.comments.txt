@@ -1,0 +1,29 @@
+{
+  "name": "carota",
+  "author": "Daniel Earwicker (dan@earwicker.com)",
+  "description": "Simple, flexible rich text rendering/editing on HTML Canvas",
+  "version": "0.1.5",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/danielearwicker/carota.git"
+  },
+  "main": "src/carota.js",
+  "scripts": {
+    "prepublish": "node make"
+  },
+  "dependencies": {
+    "per": "0.1.7"
+  },
+  "devDependencies": {
+    "webmake": "0.3.19", // before it was ">=0.3.19",
+    "node-minify": "0.8.1", // before it was ">=0.8.1",
+    "express": "3.3.4", // before it was "3.3.4",
+    "uglifyjs": "2.4.10", // before it was "^2.4.10"
+  },
+  // https://stackoverflow.com/questions/29349684/how-can-i-specify-the-required-node-js-version-in-package-json
+  "engines" : { 
+    "npm" : ">=8.0.0 <9.0.0", // I use version 8.19.2 on Linux Mint 19.2 Cinnamon v4.2.4
+    "node" : ">=16.0.0 <17.0.0" // I use version 6.18.0 on Linux Mint 19.2 Cinnamon v4.2.4
+  },
+  "license": "MIT"
+}

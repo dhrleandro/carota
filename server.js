@@ -20,4 +20,5 @@ app.get('/carota-debug.js', function(req, res) {
 
 app.use(express.static(__dirname));
 
+console.log('Link: http://localhost:3003');
 app.listen(3003);

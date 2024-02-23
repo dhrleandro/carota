@@ -15,10 +15,14 @@
     "per": "0.1.7"
   },
   "devDependencies": {
-    "webmake": ">=0.3.19",
-    "node-minify": ">=0.8.1",
+    "webmake": "0.3.19",
+    "node-minify": "0.8.1",
     "express": "3.3.4",
-    "uglifyjs": "^2.4.10"
+    "uglifyjs": "2.4.10"
+  },
+  "engines" : { 
+    "npm" : ">=8.0.0 <9.0.0",
+    "node" : ">=16.0.0 <17.0.0"
   },
   "license": "MIT"
 }

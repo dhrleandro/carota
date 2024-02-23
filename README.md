@@ -16,3 +16,12 @@ It's great to see so many people interested in Carota. I am occasionally getting
 My job is 100% full time. Carota was just a project I put together in something like a 4-day binge when I had some time off, a couple of years ago. I don't have the time to review large pull requests and figure out if they will be an improvement.
 
 On the other hand, I have no objections to anyone basing more advanced editors on it, or copying specific whole chunks of it, or using it as a starting point for something radically different, or whatever. All at your own risk, of course. :)
+
+## Run
+
+```sh
+npm install
+node server.js
+```
+
+Open http://localhost:3003
