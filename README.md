@@ -1,3 +1,9 @@
+Este branch é a cópia da master do https://github.com/pulse0ne/carota
+Os commits 78aa20356c49325b4efc31e6cbb86df4e045edd9 e c28ad42ece59b8eed4d22dcd49cc4d114ff09683
+adicionam comentários interessantes no projeto.
+
+----
+
 carota
 ======
 
